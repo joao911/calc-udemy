@@ -16,6 +16,7 @@ class CalController {
             this.setDisplayTamiDate()
         }, 1000)
 
+        this.setLastNumberToDisplay();
 
         /* displayCalcEl.innerHTML = "123456" */
     }
@@ -27,46 +28,104 @@ class CalController {
     clearAll() {
         this._operation = [];
 
+        this.setLastNumberToDisplay();
     }
     clearEntry() {
         this._operation.pop();
+
+        this.setLastNumberToDisplay();
     }
 
     getLastOperation() {
 
         return this._operation[this._operation.length - 1]
     }
-    setLastOperation(value){
-        this._operation[this._operation.length -1] = value;
+    setLastOperation(value) {
+        this._operation[this._operation.length - 1] = value;
     }
 
     isOperation(value) {
         return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
     }
+    pushOperation(value) {
+        this._operation.push(value);
+
+        if (this._operation.length > 3) {
+
+            this.calc();
+        }
+    }
+    calc() {
+        let last = this._operation.pop();
+        let result = eval(this._operation.join(""));
+
+        if (last == '%') {
+            result /= 100;
+
+            this._operation = [result];
+
+        } else {
+
+
+
+            this._operation = [result, last];
+        }
+
+
+
+        this.setLastNumberToDisplay();
+    }
+    setLastNumberToDisplay() {
+        let lastNumber;
+
+        for (let i = this._operation.length - 1; i >= 0; i--) {
+
+            if (!this.isOperation(this._operation[i])) {
+                lastNumber = this._operation[i];
+                break;
+            }
+        }
+
+        if(!lastNumber){
+            return lastNumber = 0;
+        }
+
+        this.displayCalc = lastNumber;
+
+    }
 
     AddOperator(value) {
-        console.log('A', isNaN(this.getLastOperation()));
+
 
         if (isNaN(this.getLastOperation())) {
 
             if (this.isOperation(value)) {
 
-               this._setLastOperation(value)
+                this.setLastOperation(value)
 
             } else if (isNaN(value)) {
-                console.log(value)
+
+                console.log('outra coisa', value)
+
             } else {
-                this._operation.push(value);
+
+                this.pushOperation(value);
+
+                this.setLastNumberToDisplay();
             }
 
         } else {
-            let newValue = this.getLastOperation().toString() + value.toString();
-           this.setLastOperation(parseInt(newValue));
+            if (this.isOperation(value)) {
+
+                this.pushOperation(value);
+
+            } else {
+                let newValue = this.getLastOperation().toString() + value.toString();
+                this.setLastOperation(parseInt(newValue));
+
+                this.setLastNumberToDisplay();
+            }
         }
-
-
-        console.log(this._operation)
-
     }
     setError() {
         this.displayCalc = "Error";
